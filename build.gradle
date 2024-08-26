@@ -1,0 +1,65 @@
+plugins {
+	id 'java-library'
+}
+
+repositories {
+	mavenCentral()
+}
+
+apply plugin: "java"
+apply plugin: "maven-publish"
+
+group 'com.backstage'
+version '1.0.1'
+
+dependencies {
+	implementation 'com.puppycrawl.tools:checkstyle:10.8.0'
+}
+
+javadoc {
+	if (JavaVersion.current().isJava9Compatible()) {
+		options.addBooleanOption('html5', true)
+		options.encoding('UTF-8')
+	}
+}
+
+tasks.register('sourceJar', Jar) {
+	archiveClassifier = 'sources'
+	from sourceSets.main.allJava
+}
+
+tasks.register('javadocJar', Jar) {
+	archiveClassifier = 'javadoc'
+	from javadoc
+}
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			groupId = project.group
+			artifactId = project.name
+			version = project.version
+
+			from components.java
+			artifact sourceJar
+		}
+	}
+
+	repositories {
+		maven {
+			url backstageNexusUrl
+			credentials(HttpHeaderCredentials) {
+				name = "Deploy-Token"
+				value = backstageNexusToken
+			}
+			authentication {
+				header(HttpHeaderAuthentication)
+			}
+		}
+	}
+}
+
+wrapper {
+	gradleVersion = '8.10'
+	distributionType = Wrapper.DistributionType.BIN
+}
