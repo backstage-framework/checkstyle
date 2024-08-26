@@ -10,11 +10,20 @@ apply plugin: "java"
 apply plugin: "maven-publish"
 
 group 'com.backstage'
-version '1.0.1'
+version appVersion
 
 dependencies {
 	implementation 'com.puppycrawl.tools:checkstyle:10.8.0'
 }
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(sourceJavaVersion)
+	}
+}
+
+compileJava.options.encoding = sourceEncoding
+compileTestJava.options.encoding = sourceEncoding
 
 javadoc {
 	if (JavaVersion.current().isJava9Compatible()) {
